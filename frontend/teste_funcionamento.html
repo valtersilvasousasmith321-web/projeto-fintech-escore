@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de Funcionamento — Nome Limpo</title>
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<style>
+  :root {
+    --bg: #16241F; --painel: #1F2E28; --linha: #2C3B34; --texto: #EDEAE1;
+    --primary: #4C8563; --accent: #E3A23B; --danger: #C0574A; --muted: #9C9F97;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--texto); font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    padding: 20px 16px 60px;
+  }
+  .topo { margin-bottom: 20px; }
+  .topo h1 { font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+  .topo p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  .config {
+    background: var(--painel); border: 1px solid var(--linha); border-radius: 10px;
+    padding: 14px; margin-bottom: 18px;
+  }
+  .config label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .config input {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--linha); border-radius: 7px;
+    background: var(--bg); color: var(--texto); font-size: 13px; font-family: monospace;
+  }
+
+  .botao-principal {
+    width: 100%; background: var(--primary); color: white; border: none; padding: 14px;
+    border-radius: 10px; font-size: 14.5px; font-weight: 600; cursor: pointer; margin-bottom: 18px;
+  }
+  .botao-principal:disabled { opacity: 0.5; cursor: default; }
+
+  .passo {
+    background: var(--painel); border: 1px solid var(--linha); border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+  }
+  .passo-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .passo-nome { font-size: 13.5px; font-weight: 600; }
+  .passo-status {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; flex-shrink: 0;
+  }
+  .status-aguardando { background: rgba(156,159,151,0.15); color: var(--muted); }
+  .status-rodando { background: rgba(227,162,59,0.18); color: var(--accent); }
+  .status-sucesso { background: rgba(76,133,99,0.2); color: var(--primary); }
+  .status-falha { background: rgba(192,87,74,0.2); color: var(--danger); }
+
+  .passo-detalhe {
+    font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5;
+    white-space: pre-wrap; word-break: break-word; font-family: monospace;
+    max-height: 200px; overflow-y: auto; display: none;
+    background: var(--bg); border-radius: 6px; padding: 8px;
+  }
+  .passo-detalhe.visivel { display: block; }
+
+  .resumo-final {
+    margin-top: 20px; padding: 16px; border-radius: 10px; font-size: 13px;
+    display: none; text-align: center; font-weight: 600;
+  }
+  .resumo-final.visivel { display: block; }
+  .resumo-sucesso { background: rgba(76,133,99,0.15); color: var(--primary); border: 1px solid var(--primary); }
+  .resumo-falha { background: rgba(192,87,74,0.15); color: var(--danger); border: 1px solid var(--danger); }
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <h1>Teste de Funcionamento</h1>
+  <p>Roda os fluxos principais do sistema em sequência: backend no ar,
+  cadastro, login, diagnóstico gratuito, criação de negociação. Use
+  isso depois de qualquer deploy pra confirmar rapidinho que nada quebrou.</p>
+</div>
+
+<div class="config">
+  <label for="api-base">URL da API (backend)</label>
+  <input type="text" id="api-base" value="http://localhost:8000">
+</div>
+
+<button class="botao-principal" id="botao-rodar">Rodar todos os testes</button>
+
+<div id="lista-passos"></div>
+
+<div class="resumo-final" id="resumo-final"></div>
+
+<script>
+  const PASSOS = [
+    { id: "health", nome: "1. Backend está no ar (/health)" },
+    { id: "cadastro", nome: "2. Cadastrar usuário de teste" },
+    { id: "login", nome: "3. Fazer login" },
+    { id: "diagnostico", nome: "4. Diagnóstico gratuito (/score/diagnostico)" },
+    { id: "negociacao", nome: "5. Criar negociação de teste" },
+    { id: "proposta", nome: "6. Registrar proposta de desconto" },
+  ];
+
+  let tokenTeste = null;
+  let usuarioIdTeste = null;
+  let negociacaoIdTeste = null;
+  let emailTeste = null;
+  const senhaTeste = "senhaDeTeste123";
+  const cpfTeste = "111.444.777-35"; // CPF de teste, dígito verificador válido
+
+  function montarInterface() {
+    const container = document.getElementById("lista-passos");
+    container.innerHTML = "";
+    PASSOS.forEach((passo) => {
+      const div = document.createElement("div");
+      div.className = "passo";
+      div.id = `passo-${passo.id}`;
+      div.innerHTML = `
+        <div class="passo-topo">
+          <span class="passo-nome">${passo.nome}</span>
+          <span class="passo-status status-aguardando" id="status-${passo.id}">aguardando</span>
+        </div>
+        <div class="passo-detalhe" id="detalhe-${passo.id}"></div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function atualizarPasso(id, status, detalhe) {
+    const elStatus = document.getElementById(`status-${id}`);
+    const elDetalhe = document.getElementById(`detalhe-${id}`);
+    elStatus.className = `passo-status status-${status}`;
+    elStatus.textContent = status === "sucesso" ? "OK" : status === "falha" ? "FALHOU" : status;
+    if (detalhe) {
+      elDetalhe.textContent = typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe, null, 2);
+      elDetalhe.classList.add("visivel");
+    }
+  }
+
+  async function testeHealth(apiBase) {
+    const resp = await fetch(`${apiBase}/health`);
+    const dados = await resp.json();
+    if (!resp.ok || dados.status !== "ok") throw new Error("resposta inesperada: " + JSON.stringify(dados));
+    return dados;
+  }
+
+  async function testeCadastro(apiBase) {
+    emailTeste = `teste.${Date.now()}@exemplo.com`;
+    const resp = await fetch(`${apiBase}/auth/cadastro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ documento: cpfTeste, email: emailTeste, senha: senhaTeste }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.detail ? JSON.stringify(dados.detail) : "falha no cadastro");
+    usuarioIdTeste = dados.usuario_id;
+    return dados;
+  }
+
+  async function testeLogin(apiBase) {
+    const resp = await fetch(
+      `${apiBase}/auth/login?email=${encodeURIComponent(emailTeste)}&senha=${encodeURIComponent(senhaTeste)}`,
+      { method: "POST" }
+    );
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.detail || "falha no login");
+    tokenTeste = dados.access_token;
+    return { token_recebido: !!tokenTeste, tipo: dados.token_type };
+  }
+
+  async function testeDiagnostico(apiBase) {
+    const payload = {
+      documento: cpfTeste,
+      utilizacao_credito_atual: 0.88,
+      utilizacao_credito_meta: 0.30,
+      meses_historico_disponivel: 8,
+      pontualidade_pagamentos_24m: 0.92,
+      score_atual: 560,
+      tempo_relacionamento_credito_meses: 42,
+      quantidade_tipos_credito_ativos: 3,
+      dividas_ativas: [
+        { credor: "Credor Teste", valor: 340.0, dias_atraso: 120, origem: "teste", negativado: true },
+      ],
+      consultas_cpf_ultimos_30_dias: 2,
+    };
+    const resp = await fetch(`${apiBase}/score/diagnostico`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenTeste}` },
+      body: JSON.stringify(payload),
+    });
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.detail ? JSON.stringify(dados.detail) : "falha no diagnóstico");
+    return { score_atual: dados.score_atual, score_estimado: dados.score_estimado_apos_plano };
+  }
+
+  async function testeCriarNegociacao(apiBase) {
+    const resp = await fetch(`${apiBase}/negociacao`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenTeste}` },
+      body: JSON.stringify({ usuario_id: usuarioIdTeste, credor: "Credor de Teste", valor_original: 1000.0 }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.detail ? JSON.stringify(dados.detail) : "falha ao criar negociação");
+    negociacaoIdTeste = dados.negociacao_id;
+    return dados;
+  }
+
+  async function testeRegistrarProposta(apiBase) {
+    const resp = await fetch(`${apiBase}/negociacao/${negociacaoIdTeste}/proposta`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenTeste}` },
+      body: JSON.stringify({ valor_com_desconto: 700.0 }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.detail ? JSON.stringify(dados.detail) : "falha ao registrar proposta");
+    return dados;
+  }
+
+  const EXECUTORES = {
+    health: testeHealth,
+    cadastro: testeCadastro,
+    login: testeLogin,
+    diagnostico: testeDiagnostico,
+    negociacao: testeCriarNegociacao,
+    proposta: testeRegistrarProposta,
+  };
+
+  document.getElementById("botao-rodar").addEventListener("click", async () => {
+    const apiBase = document.getElementById("api-base").value.trim().replace(/\/$/, "");
+    const botao = document.getElementById("botao-rodar");
+    const resumo = document.getElementById("resumo-final");
+    resumo.classList.remove("visivel");
+    botao.disabled = true;
+    botao.textContent = "Rodando...";
+
+    montarInterface();
+    let todosPassaram = true;
+
+    for (const passo of PASSOS) {
+      atualizarPasso(passo.id, "rodando");
+      try {
+        const resultado = await EXECUTORES[passo.id](apiBase);
+        atualizarPasso(passo.id, "sucesso", resultado);
+      } catch (erro) {
+        atualizarPasso(passo.id, "falha", erro.message || String(erro));
+        todosPassaram = false;
+        break; // para na primeira falha — os passos seguintes dependem dos anteriores
+      }
+    }
+
+    resumo.className = `resumo-final visivel ${todosPassaram ? "resumo-sucesso" : "resumo-falha"}`;
+    resumo.textContent = todosPassaram
+      ? "✓ Tudo funcionando — backend, cadastro, login, diagnóstico e negociação passaram."
+      : "✗ Algo falhou — veja o passo marcado em vermelho acima pra saber onde.";
+
+    botao.disabled = false;
+    botao.textContent = "Rodar todos os testes de novo";
+  });
+
+  montarInterface();
+</script>
+
+</body>
+</html>

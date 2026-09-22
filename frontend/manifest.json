@@ -1,0 +1,25 @@
+{
+  "name": "Nome Limpo — Score Transparente",
+  "short_name": "Nome Limpo",
+  "description": "A gente resolve seu nome sujo e aumenta seu score — e te mostra exatamente como, passo a passo, até o fim.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#1F4B3F",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

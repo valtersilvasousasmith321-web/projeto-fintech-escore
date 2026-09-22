@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central de Ajuda</title>
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<meta name="theme-color" content="#1F4B3F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF9F6; --deep: #16241F; --primary: #1F4B3F; --primary-light: #2E6650;
+    --accent: #E3A23B; --accent-soft: #FBEBD2; --danger: #B3452F;
+    --success: #4C8563; --line: #E3DFD4; --muted: #6B6A62;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--deep); font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center;
+  }
+  .tela { width: 100%; max-width: 420px; min-height: 100vh; padding: 20px 20px 30px; }
+
+  .topo { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .voltar {
+    width: 34px; height: 34px; border-radius: 50%; background: white; border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--primary);
+    text-decoration: none; flex-shrink: 0;
+  }
+  .topo-titulo { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; }
+
+  .abas { display: flex; gap: 8px; margin-bottom: 20px; }
+  .aba {
+    flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    background: white; border: 1px solid var(--line); color: var(--muted); cursor: pointer;
+  }
+  .aba.ativa { background: var(--primary); color: white; border-color: var(--primary); }
+
+  #painel-faq, #painel-chat { display: none; }
+  #painel-faq.visivel, #painel-chat.visivel { display: block; }
+
+  .pergunta {
+    background: white; border: 1px solid var(--line); border-radius: 12px; padding: 15px;
+    margin-bottom: 12px; cursor: pointer;
+  }
+  .pergunta-titulo { font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; }
+  .pergunta-resposta {
+    font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 10px; display: none;
+  }
+  .pergunta.aberta .pergunta-resposta { display: block; }
+  .pergunta.aberta .pergunta-seta { transform: rotate(180deg); }
+  .pergunta-seta { transition: transform 0.15s; color: var(--muted); }
+
+  .contato {
+    margin-top: 20px; padding: 16px; background: var(--accent-soft); border-radius: 12px;
+    font-size: 13px; color: #6B4A1E; line-height: 1.5;
+  }
+  .contato strong { color: var(--deep); }
+
+  /* ---- Chat ---- */
+  .aviso-login {
+    background: var(--accent-soft); border-radius: 12px; padding: 16px; font-size: 13px;
+    color: #6B4A1E; line-height: 1.5; margin-bottom: 16px;
+  }
+  .aviso-login a { color: var(--primary); font-weight: 600; }
+
+  .caixa-chat {
+    display: flex; flex-direction: column; height: 55vh; border: 1px solid var(--line);
+    border-radius: 14px; background: white; overflow: hidden;
+  }
+  .mensagens-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .balao {
+    max-width: 85%; padding: 10px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.4;
+  }
+  .balao.usuario { align-self: flex-end; background: var(--primary); color: white; }
+  .balao.assistente { align-self: flex-start; background: var(--bg); color: var(--deep); }
+  .balao.carregando { align-self: flex-start; color: var(--muted); font-style: italic; font-size: 12.5px; }
+
+  .entrada-chat { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+  .entrada-chat input {
+    flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; font-family: inherit;
+  }
+  .entrada-chat button {
+    background: var(--primary); color: white; border: none; border-radius: 10px;
+    padding: 0 16px; font-weight: 600; font-size: 13px; cursor: pointer;
+  }
+
+  .aviso-legal-chat { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<div class="tela">
+
+  <div class="topo">
+    <a href="index.html" class="voltar">‹</a>
+    <div class="topo-titulo">Central de Ajuda</div>
+  </div>
+
+  <div class="abas">
+    <div class="aba ativa" id="aba-faq">Perguntas frequentes</div>
+    <div class="aba" id="aba-chat">Falar com a IA</div>
+  </div>
+
+  <div id="painel-faq" class="visivel">
+
+    <div class="pergunta">
+      <div class="pergunta-titulo">Por que meu score no app é diferente do que vi direto no Serasa?<span class="pergunta-seta">⌄</span></div>
+      <div class="pergunta-resposta">O app mostra o score oficial do birô (mesma fonte). Os "pontos estimados" de cada ação são uma projeção nossa, não um recálculo oficial. O número principal do dashboard é sempre o dado real do birô, atualizado na última consulta.</div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-titulo">Fui pré-qualificado e mesmo assim fui negado. Isso é enganação?<span class="pergunta-seta">⌄</span></div>
+      <div class="pergunta-resposta">Não. A pré-qualificação mostra que você atendia aos critérios públicos do parceiro no momento da consulta. A decisão final de crédito considera fatores internos do parceiro que não são compartilhados publicamente — isso não significa que sua elegibilidade estava errada.</div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-titulo">Quanto custa negociar minhas dívidas pelo app?<span class="pergunta-seta">⌄</span></div>
+      <div class="pergunta-resposta">Se existir oferta pública de desconto (ex: Serasa Limpa Nome), é grátis. Se você usar a negociação assistida, a comissão só é cobrada depois que o acordo é confirmado no birô — nunca antes.</div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-titulo">Esqueci minha senha, e agora?<span class="pergunta-seta">⌄</span></div>
+      <div class="pergunta-resposta">Na tela de login, toque em "Esqueci minha senha" e informe seu e-mail. Você recebe um link com um token de redefinição, válido por 30 minutos.</div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-titulo">O app garante que meu crédito vai ser aprovado?<span class="pergunta-seta">⌄</span></div>
+      <div class="pergunta-resposta">Não — e nenhuma empresa consegue garantir isso de verdade. A decisão final de qualquer crédito é sempre da instituição financeira. O que o app garante é transparência total sobre o processo e sobre suas chances reais.</div>
+    </div>
+
+    <div class="contato">
+      <strong>Não encontrou o que precisava?</strong><br>
+      Fale com nosso suporte humano: suporte@nomelimpo.com.br (segunda a sexta, 9h às 18h)
+    </div>
+  </div>
+
+  <div id="painel-chat">
+    <div class="aviso-login" id="aviso-login" style="display:none">
+      Você precisa estar logado para conversar com a IA de suporte. <a href="index.html">Fazer login</a>
+    </div>
+
+    <div class="caixa-chat" id="caixa-chat">
+      <div class="mensagens-chat" id="mensagens-chat"></div>
+      <div class="entrada-chat">
+        <input type="text" id="input-chat" placeholder="Digite sua dúvida...">
+        <button id="botao-enviar-chat">Enviar</button>
+      </div>
+    </div>
+    <div class="aviso-legal-chat">
+      A IA responde só sobre o funcionamento do app. Para questões de conta ou dados pessoais, use o suporte humano na aba de perguntas frequentes.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE_URL = "http://localhost:8000";
+  const historicoChat = [];
+
+  // ---- Alternar abas ----
+  document.getElementById("aba-faq").addEventListener("click", () => {
+    document.getElementById("aba-faq").classList.add("ativa");
+    document.getElementById("aba-chat").classList.remove("ativa");
+    document.getElementById("painel-faq").classList.add("visivel");
+    document.getElementById("painel-chat").classList.remove("visivel");
+  });
+  document.getElementById("aba-chat").addEventListener("click", () => {
+    document.getElementById("aba-chat").classList.add("ativa");
+    document.getElementById("aba-faq").classList.remove("ativa");
+    document.getElementById("painel-chat").classList.add("visivel");
+    document.getElementById("painel-faq").classList.remove("visivel");
+  });
+
+  // ---- FAQ expansível ----
+  document.querySelectorAll(".pergunta").forEach((el) => {
+    el.addEventListener("click", () => el.classList.toggle("aberta"));
+  });
+
+  // ---- Chat ----
+  const tokenSalvo = sessionStorage.getItem("nome_limpo_token");
+  if (!tokenSalvo) {
+    document.getElementById("aviso-login").style.display = "block";
+    document.getElementById("caixa-chat").style.display = "none";
+  } else {
+    adicionarBalao("assistente", "Oi! Sou o assistente do Nome Limpo. Posso te ajudar a entender seu score, seu plano de ação ou como negociar suas dívidas. O que você quer saber?");
+  }
+
+  function adicionarBalao(tipo, texto) {
+    const container = document.getElementById("mensagens-chat");
+    const balao = document.createElement("div");
+    balao.className = `balao ${tipo}`;
+    balao.textContent = texto;
+    container.appendChild(balao);
+    container.scrollTop = container.scrollHeight;
+    return balao;
+  }
+
+  async function enviarMensagem() {
+    const input = document.getElementById("input-chat");
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    adicionarBalao("usuario", texto);
+    historicoChat.push({ role: "user", content: texto });
+    input.value = "";
+
+    const balaoCarregando = adicionarBalao("carregando", "digitando...");
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/suporte/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenSalvo}` },
+        body: JSON.stringify({ mensagens: historicoChat }),
+      });
+      const dados = await resp.json();
+      balaoCarregando.remove();
+
+      if (!resp.ok) {
+        adicionarBalao("assistente", dados.detail || "Não foi possível responder agora.");
+        return;
+      }
+      adicionarBalao("assistente", dados.resposta);
+      historicoChat.push({ role: "assistant", content: dados.resposta });
+    } catch (erro) {
+      balaoCarregando.remove();
+      adicionarBalao("assistente", "Erro de conexão. Verifique se a API está rodando.");
+    }
+  }
+
+  document.getElementById("botao-enviar-chat").addEventListener("click", enviarMensagem);
+  document.getElementById("input-chat").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") enviarMensagem();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nome Limpo — Score Transparente</title>
+<meta name="theme-color" content="#1F4B3F">
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF9F6; --deep: #16241F; --primary: #1F4B3F; --primary-light: #2E6650;
+    --accent: #E3A23B; --accent-soft: #FBEBD2; --danger: #B3452F; --danger-soft: #F5E1DA;
+    --success: #4C8563; --line: #E3DFD4; --muted: #6B6A62;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--deep); font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center;
+  }
+  .tela { width: 100%; max-width: 420px; min-height: 100vh; padding: 20px 20px 60px; }
+
+  /* ---- Barra de instalação ---- */
+  .barra-instalar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--primary);
+    color: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 13px;
+  }
+  .barra-instalar.visivel { display: flex; }
+  .barra-instalar-texto { display: flex; align-items: center; gap: 10px; }
+  .barra-instalar-icone {
+    width: 30px; height: 30px; border-radius: 8px; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+  }
+  .botao-instalar {
+    background: var(--accent); color: var(--deep); border: none; font-weight: 600;
+    font-size: 12.5px; padding: 8px 14px; border-radius: 100px; cursor: pointer; flex-shrink: 0;
+  }
+  .fechar-instalar {
+    background: none; border: none; color: rgba(255,255,255,0.6); font-size: 16px;
+    margin-left: 8px; cursor: pointer;
+  }
+
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .marca-nome { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--primary); }
+  .lema { font-size: 11.5px; color: var(--muted); max-width: 230px; line-height: 1.35; margin-top: 3px; }
+
+  /* ---- Formulário de login ---- */
+  .cartao {
+    background: white; border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+  }
+  .cartao-titulo { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 4px; }
+  .cartao-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+  label { font-size: 12.5px; font-weight: 600; display: block; margin-bottom: 6px; margin-top: 14px; }
+  input {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 14px; font-family: inherit; background: var(--bg);
+  }
+  input:focus { outline: none; border-color: var(--primary); }
+
+  .botao-principal {
+    width: 100%; background: var(--primary); color: white; border: none; padding: 14px;
+    border-radius: 12px; font-size: 14.5px; font-weight: 600; margin-top: 20px; cursor: pointer;
+  }
+  .botao-secundario {
+    width: 100%; background: none; color: var(--primary); border: none; padding: 10px;
+    font-size: 13px; font-weight: 600; margin-top: 10px; cursor: pointer;
+  }
+
+  .mensagem-erro {
+    font-size: 12.5px; color: var(--danger); background: var(--danger-soft);
+    padding: 10px 12px; border-radius: 8px; margin-top: 14px; display: none;
+  }
+  .mensagem-erro.visivel { display: block; }
+
+  .config-api {
+    font-size: 11px; color: var(--muted); margin-top: 18px; text-align: center;
+  }
+
+  /* ---- Dashboard (após login) ---- */
+  #painel { display: none; }
+  #painel.visivel { display: block; }
+  #tela-login.oculta { display: none; }
+
+  .modulo-score {
+    background: var(--primary); border-radius: 20px; padding: 24px; color: white; margin-bottom: 18px;
+  }
+  .score-topo { display: flex; justify-content: space-between; align-items: center; }
+  .score-rotulo { font-size: 13px; color: rgba(255,255,255,0.75); }
+  .score-numero { font-family: 'Fraunces', serif; font-size: 56px; font-weight: 600; margin-top: 8px; }
+  .score-nota { font-size: 12.5px; color: rgba(255,255,255,0.7); margin-top: 6px; }
+
+  .fator { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .fator:last-child { border-bottom: none; }
+  .fator-topo { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13.5px; font-weight: 600; }
+  .fator-barra-fundo { height: 5px; background: var(--line); border-radius: 100px; overflow: hidden; }
+  .fator-barra-preenchida { height: 100%; border-radius: 100px; background: var(--primary); }
+
+  .aviso-legal { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-top: 18px; }
+
+  .status-carregando { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="tela">
+
+  <div class="barra-instalar" id="barra-instalar">
+    <div class="barra-instalar-texto">
+      <span class="barra-instalar-icone">⇩</span>
+      <span>Instalar o app na tela inicial</span>
+    </div>
+    <div>
+      <button class="botao-instalar" id="botao-instalar">Instalar</button>
+      <button class="fechar-instalar" id="fechar-instalar">✕</button>
+    </div>
+  </div>
+
+  <header>
+    <div>
+      <div class="marca-nome">Nome Limpo</div>
+      <div class="lema">A gente resolve seu nome sujo e aumenta seu score — passo a passo, até o fim.</div>
+    </div>
+  </header>
+
+  <div id="tela-login">
+    <div class="cartao">
+      <div class="cartao-titulo">Entrar</div>
+      <div class="cartao-sub">Acesse seu diagnóstico de score.</div>
+
+      <label for="input-email">E-mail</label>
+      <input type="email" id="input-email" placeholder="seuemail@exemplo.com">
+
+      <label for="input-senha">Senha</label>
+      <input type="password" id="input-senha" placeholder="mínimo 8 caracteres">
+
+      <button class="botao-principal" id="botao-login">Entrar</button>
+      <button class="botao-secundario" id="botao-mostrar-cadastro">Não tenho conta — cadastrar</button>
+      <button class="botao-secundario" id="botao-mostrar-esqueci">Esqueci minha senha</button>
+
+      <div class="mensagem-erro" id="mensagem-erro"></div>
+    </div>
+
+    <div class="config-api">
+      API conectada em: <span id="texto-api-base"></span> · <a href="suporte.html" style="color:var(--primary)">Central de Ajuda</a>
+    </div>
+  </div>
+
+  <div id="tela-esqueci-senha" style="display:none">
+    <div class="cartao">
+      <div class="cartao-titulo">Esqueci minha senha</div>
+      <div class="cartao-sub">Informe seu e-mail. Se estiver cadastrado, você recebe um link de redefinição.</div>
+
+      <label for="esq-email">E-mail</label>
+      <input type="email" id="esq-email" placeholder="seuemail@exemplo.com">
+
+      <button class="botao-principal" id="botao-enviar-esqueci">Enviar</button>
+      <button class="botao-secundario" id="botao-voltar-login-esqueci">Voltar pro login</button>
+
+      <div class="mensagem-erro" id="mensagem-esqueci" style="background:var(--accent-soft); color:#6B4A1E;"></div>
+    </div>
+  </div>
+
+  <div id="tela-redefinir-senha" style="display:none">
+    <div class="cartao">
+      <div class="cartao-titulo">Criar nova senha</div>
+      <div class="cartao-sub">Cole o token recebido por e-mail e escolha a nova senha.</div>
+
+      <label for="red-token">Token de redefinição</label>
+      <input type="text" id="red-token" placeholder="colado do e-mail">
+
+      <label for="red-nova-senha">Nova senha</label>
+      <input type="password" id="red-nova-senha" placeholder="mínimo 8 caracteres">
+
+      <button class="botao-principal" id="botao-confirmar-redefinicao">Redefinir senha</button>
+      <button class="botao-secundario" id="botao-voltar-login-redefinir">Voltar pro login</button>
+
+      <div class="mensagem-erro" id="mensagem-redefinir"></div>
+    </div>
+  </div>
+
+  <div id="tela-cadastro" style="display:none">
+    <div class="cartao">
+      <div class="cartao-titulo">Criar conta</div>
+      <div class="cartao-sub">Documento validado com dígito verificador real (CPF ou CNPJ).</div>
+
+      <label for="cad-documento">CPF ou CNPJ</label>
+      <input type="text" id="cad-documento" placeholder="000.000.000-00">
+
+      <label for="cad-email">E-mail</label>
+      <input type="email" id="cad-email" placeholder="seuemail@exemplo.com">
+
+      <label for="cad-senha">Senha</label>
+      <input type="password" id="cad-senha" placeholder="mínimo 8 caracteres">
+
+      <button class="botao-principal" id="botao-cadastrar">Criar conta</button>
+      <button class="botao-secundario" id="botao-voltar-login">Voltar pro login</button>
+
+      <div class="mensagem-erro" id="mensagem-erro-cadastro"></div>
+    </div>
+  </div>
+
+  <div id="painel">
+    <div class="status-carregando" id="status-carregando">Carregando seu diagnóstico...</div>
+
+    <div class="modulo-score" id="bloco-score" style="display:none">
+      <div class="score-topo">
+        <span class="score-rotulo">Seu score hoje</span>
+      </div>
+      <div class="score-numero" id="valor-score">—</div>
+      <div class="score-nota" id="nota-score">—</div>
+    </div>
+
+    <div class="cartao" id="bloco-fatores" style="display:none">
+      <div class="cartao-titulo">Fatores do seu score</div>
+      <div id="lista-fatores"></div>
+    </div>
+
+    <div class="cartao" id="bloco-assinatura" style="display:none; margin-top: 16px;">
+      <div class="cartao-titulo">Planos</div>
+      <div class="cartao-sub">Monitoramento contínuo e alertas em tempo real.</div>
+      <label for="documento-assinatura">CPF ou CNPJ (necessário só na hora de assinar/consultar)</label>
+      <input type="text" id="documento-assinatura" placeholder="000.000.000-00">
+      <button class="botao-principal" id="botao-assinar-plus" style="margin-top:12px">Assinar Plus — R$ 19,90/mês</button>
+      <button class="botao-secundario" id="botao-assinar-premium">Assinar Premium — R$ 39,90/mês</button>
+      <button class="botao-secundario" id="botao-consulta-avulsa">Consulta avulsa (sem assinatura) — R$ 24,90</button>
+      <div class="mensagem-erro" id="mensagem-assinatura"></div>
+    </div>
+
+    <div class="aviso-legal">
+      Estimativas baseadas em modelo estatístico interno. O score oficial é calculado exclusivamente pelo birô de crédito.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ------------------------------------------------------------------
+  // CONFIGURAÇÃO: troque pela URL da sua API depois do deploy
+  // (ex: "https://seu-app.onrender.com"). Em desenvolvimento local,
+  // deixe como está.
+  // ------------------------------------------------------------------
+  const API_BASE_URL = "http://localhost:8000";
+
+  document.getElementById("texto-api-base").textContent = API_BASE_URL;
+
+  // Escape defensivo de HTML — usado sempre que um valor vindo da API
+  // é inserido via innerHTML, mesmo quando a origem parece confiável.
+  function escaparHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = String(texto ?? "");
+    return div.innerHTML;
+  }
+
+  let tokenAcesso = null;
+
+  // ---------------- Registro do Service Worker (necessário pra instalar) ----------------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {
+        // Se falhar (ex: rodando via file://), o app continua funcionando normalmente,
+        // só não fica instalável.
+      });
+    });
+  }
+
+  // ---------------- Botão de instalar (PWA) ----------------
+  let eventoInstalacaoDiferido = null;
+  const barraInstalar = document.getElementById("barra-instalar");
+
+  window.addEventListener("beforeinstallprompt", (evento) => {
+    evento.preventDefault();
+    eventoInstalacaoDiferido = evento;
+    barraInstalar.classList.add("visivel");
+  });
+
+  document.getElementById("botao-instalar").addEventListener("click", async () => {
+    if (!eventoInstalacaoDiferido) return;
+    eventoInstalacaoDiferido.prompt();
+    await eventoInstalacaoDiferido.userChoice;
+    eventoInstalacaoDiferido = null;
+    barraInstalar.classList.remove("visivel");
+  });
+
+  document.getElementById("fechar-instalar").addEventListener("click", () => {
+    barraInstalar.classList.remove("visivel");
+  });
+
+  // ---------------- Navegação entre telas ----------------
+  document.getElementById("botao-mostrar-cadastro").addEventListener("click", () => {
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("tela-cadastro").style.display = "block";
+  });
+  document.getElementById("botao-voltar-login").addEventListener("click", () => {
+    document.getElementById("tela-cadastro").style.display = "none";
+    document.getElementById("tela-login").style.display = "block";
+  });
+
+  document.getElementById("botao-mostrar-esqueci").addEventListener("click", () => {
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("tela-esqueci-senha").style.display = "block";
+  });
+  document.getElementById("botao-voltar-login-esqueci").addEventListener("click", () => {
+    document.getElementById("tela-esqueci-senha").style.display = "none";
+    document.getElementById("tela-login").style.display = "block";
+  });
+  document.getElementById("botao-voltar-login-redefinir").addEventListener("click", () => {
+    document.getElementById("tela-redefinir-senha").style.display = "none";
+    document.getElementById("tela-login").style.display = "block";
+  });
+
+  // ---------------- Esqueci a senha ----------------
+  document.getElementById("botao-enviar-esqueci").addEventListener("click", async () => {
+    const email = document.getElementById("esq-email").value.trim();
+    const caixaMensagem = document.getElementById("mensagem-esqueci");
+    caixaMensagem.classList.remove("visivel");
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/esqueci-senha`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const dados = await resp.json();
+      caixaMensagem.textContent = dados.detail;
+      caixaMensagem.classList.add("visivel");
+
+      // Em ambiente de desenvolvimento, a API devolve o token direto
+      // (sem envio real de e-mail configurado). Isso nunca acontece em produção.
+      if (dados.token_dev_apenas) {
+        caixaMensagem.textContent += ` (modo dev — token: ${dados.token_dev_apenas})`;
+        document.getElementById("tela-esqueci-senha").style.display = "none";
+        document.getElementById("tela-redefinir-senha").style.display = "block";
+        document.getElementById("red-token").value = dados.token_dev_apenas;
+      }
+    } catch (erro) {
+      caixaMensagem.textContent = "Erro de conexão com a API.";
+      caixaMensagem.classList.add("visivel");
+    }
+  });
+
+  document.getElementById("botao-confirmar-redefinicao").addEventListener("click", async () => {
+    const token = document.getElementById("red-token").value.trim();
+    const novaSenha = document.getElementById("red-nova-senha").value;
+    esconderErro("mensagem-redefinir");
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/redefinir-senha`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, nova_senha: novaSenha }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail || "Não foi possível redefinir a senha.");
+
+      document.getElementById("tela-redefinir-senha").style.display = "none";
+      document.getElementById("tela-login").style.display = "block";
+    } catch (erro) {
+      mostrarErro("mensagem-redefinir", erro.message);
+    }
+  });
+
+  function mostrarErro(idElemento, mensagem) {
+    const el = document.getElementById(idElemento);
+    el.textContent = mensagem;
+    el.classList.add("visivel");
+  }
+  function esconderErro(idElemento) {
+    document.getElementById(idElemento).classList.remove("visivel");
+  }
+
+  // ---------------- Cadastro ----------------
+  document.getElementById("botao-cadastrar").addEventListener("click", async () => {
+    esconderErro("mensagem-erro-cadastro");
+    const documento = document.getElementById("cad-documento").value.trim();
+    const email = document.getElementById("cad-email").value.trim();
+    const senha = document.getElementById("cad-senha").value;
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/cadastro`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documento, email, senha }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) {
+        throw new Error(dados.detail || "Não foi possível criar a conta.");
+      }
+      document.getElementById("botao-voltar-login").click();
+      document.getElementById("input-email").value = email;
+    } catch (erro) {
+      mostrarErro("mensagem-erro-cadastro", erro.message || "Erro de conexão com a API. Ela está rodando?");
+    }
+  });
+
+  // ---------------- Login ----------------
+  document.getElementById("botao-login").addEventListener("click", async () => {
+    esconderErro("mensagem-erro");
+    const email = document.getElementById("input-email").value.trim();
+    const senha = document.getElementById("input-senha").value;
+
+    try {
+      const resp = await fetch(
+        `${API_BASE_URL}/auth/login?email=${encodeURIComponent(email)}&senha=${encodeURIComponent(senha)}`,
+        { method: "POST" }
+      );
+      const dados = await resp.json();
+      if (!resp.ok) {
+        throw new Error(dados.detail || "e-mail ou senha inválidos");
+      }
+      tokenAcesso = dados.access_token;
+      sessionStorage.setItem("nome_limpo_token", tokenAcesso);
+      document.getElementById("tela-login").classList.add("oculta");
+      document.getElementById("painel").classList.add("visivel");
+      carregarDiagnostico();
+    } catch (erro) {
+      mostrarErro("mensagem-erro", erro.message || "Erro de conexão com a API. Ela está rodando?");
+    }
+  });
+
+  // ---------------- Diagnóstico de score ----------------
+  async function carregarDiagnostico() {
+    // Dados de exemplo — em produção, isso viria do Open Finance/birô já
+    // conectados (ver app/integrations/pluggy_adapter.py no backend).
+    const payloadExemplo = {
+      documento: "111.444.777-35",
+      utilizacao_credito_atual: 0.88,
+      utilizacao_credito_meta: 0.30,
+      meses_historico_disponivel: 8,
+      pontualidade_pagamentos_24m: 0.92,
+      score_atual: 530,
+      tempo_relacionamento_credito_meses: 42,
+      quantidade_tipos_credito_ativos: 3,
+      dividas_ativas: [
+        { credor: "Credor Alfa Financeira", valor: 340.0, dias_atraso: 120, origem: "biro_serasa", negativado: true },
+        { credor: "Loja Beta Varejo", valor: 89.9, dias_atraso: 30, origem: "biro_boa_vista", negativado: true },
+      ],
+      consultas_cpf_ultimos_30_dias: 2,
+    };
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/score/diagnostico`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenAcesso}` },
+        body: JSON.stringify(payloadExemplo),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail || "Falha ao carregar diagnóstico");
+
+      document.getElementById("status-carregando").style.display = "none";
+      document.getElementById("bloco-score").style.display = "block";
+      document.getElementById("bloco-fatores").style.display = "block";
+      document.getElementById("bloco-assinatura").style.display = "block";
+
+      document.getElementById("valor-score").textContent = dados.score_atual;
+      document.getElementById("nota-score").textContent =
+        `Estimado em 90 dias: ${dados.score_estimado_apos_plano} (confiança do modelo: ${Math.round(dados.confianca_modelo * 100)}%)`;
+
+      const listaFatores = document.getElementById("lista-fatores");
+      listaFatores.innerHTML = "";
+      Object.entries(dados.fatores).forEach(([nome, valor]) => {
+        const linha = document.createElement("div");
+        linha.className = "fator";
+        const percentual = typeof valor === "number" && valor <= 1 ? Math.round(valor * 100) : 50;
+        linha.innerHTML = `
+          <div class="fator-topo"><span>${escaparHtml(nome.replaceAll("_", " "))}</span><span>${escaparHtml(valor)}</span></div>
+          <div class="fator-barra-fundo"><div class="fator-barra-preenchida" style="width:${percentual}%"></div></div>
+        `;
+        listaFatores.appendChild(linha);
+      });
+    } catch (erro) {
+      document.getElementById("status-carregando").textContent =
+        "Não foi possível carregar o diagnóstico. Verifique se a API está rodando em " + API_BASE_URL;
+    }
+  }
+
+  // ---------------- Assinatura (Plus / Premium) ----------------
+  async function assinarPlano(plano) {
+    const caixaErro = document.getElementById("mensagem-assinatura");
+    caixaErro.classList.remove("visivel");
+    const documento = document.getElementById("documento-assinatura").value.trim();
+
+    if (!documento) {
+      caixaErro.textContent = "Informe seu CPF ou CNPJ pra continuar.";
+      caixaErro.classList.add("visivel");
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/pagamentos/assinatura`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenAcesso}` },
+        body: JSON.stringify({ plano, tipo_pagamento: "CREDIT_CARD", documento }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) {
+        const detalhe = Array.isArray(dados.detail) ? dados.detail.map((d) => d.msg).join(", ") : dados.detail;
+        throw new Error(detalhe || "Não foi possível criar a assinatura.");
+      }
+
+      if (dados.link_pagamento) {
+        window.location.href = dados.link_pagamento;
+      } else {
+        caixaErro.textContent = "Assinatura criada. Verifique seu e-mail pra concluir o pagamento.";
+        caixaErro.classList.add("visivel");
+      }
+    } catch (erro) {
+      caixaErro.textContent = erro.message || "Erro de conexão com o gateway de pagamento.";
+      caixaErro.classList.add("visivel");
+    }
+  }
+
+  document.getElementById("botao-assinar-plus").addEventListener("click", () => assinarPlano("plus"));
+  document.getElementById("botao-assinar-premium").addEventListener("click", () => assinarPlano("premium"));
+
+  document.getElementById("botao-consulta-avulsa").addEventListener("click", async () => {
+    const caixaErro = document.getElementById("mensagem-assinatura");
+    caixaErro.classList.remove("visivel");
+    const documento = document.getElementById("documento-assinatura").value.trim();
+
+    if (!documento) {
+      caixaErro.textContent = "Informe seu CPF ou CNPJ pra continuar.";
+      caixaErro.classList.add("visivel");
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/pagamentos/consulta-avulsa`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenAcesso}` },
+        body: JSON.stringify({ documento, tipo_pagamento: "PIX" }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) {
+        const detalhe = Array.isArray(dados.detail) ? dados.detail.map((d) => d.msg).join(", ") : dados.detail;
+        throw new Error(detalhe || "Não foi possível gerar a cobrança.");
+      }
+
+      if (dados.link_pagamento) {
+        window.location.href = dados.link_pagamento;
+      } else {
+        caixaErro.textContent = "Cobrança gerada. Depois de pago, sua consulta fica liberada.";
+        caixaErro.classList.add("visivel");
+      }
+    } catch (erro) {
+      caixaErro.textContent = erro.message || "Erro de conexão com o gateway de pagamento.";
+      caixaErro.classList.add("visivel");
+    }
+  });
+</script>
+
+</body>
+</html>

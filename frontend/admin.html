@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo</title>
+<link rel="icon" type="image/x-icon" href="icons/admin-favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/admin-favicon-32.png">
+<link rel="manifest" href="admin-manifest.json">
+<link rel="apple-touch-icon" href="icons/admin-apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#16241F">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16241F; --painel: #1F2E28; --linha: #2C3B34; --texto: #EDEAE1; --muted: #9C9F97;
+    --primary: #4C8563; --accent: #E3A23B; --danger: #C0574A; --danger-soft: #3A2621;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--texto); font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .marca { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; }
+  .marca span { color: var(--accent); }
+  .sair { font-size: 12.5px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+
+  /* ---- Login ---- */
+  #tela-login-admin { max-width: 360px; margin: 80px auto; }
+  .cartao-login {
+    background: var(--painel); border: 1px solid var(--linha); border-radius: 14px; padding: 24px;
+  }
+  .cartao-login h1 { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; margin-bottom: 6px; }
+  .cartao-login p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+  label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px; margin-top: 12px; color: var(--muted); }
+  input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--linha); border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: var(--bg); color: var(--texto);
+  }
+  input:focus { outline: none; border-color: var(--primary); }
+  button {
+    font-family: inherit; cursor: pointer;
+  }
+  .botao-primario {
+    width: 100%; background: var(--primary); color: white; border: none; padding: 12px;
+    border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 18px;
+  }
+  .erro {
+    font-size: 12.5px; color: #E8998C; background: var(--danger-soft); padding: 9px 11px;
+    border-radius: 6px; margin-top: 12px; display: none;
+  }
+  .erro.visivel { display: block; }
+
+  /* ---- Painel ---- */
+  #painel-admin { display: none; }
+  #painel-admin.visivel { display: block; }
+
+  .abas { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid var(--linha); }
+  .aba {
+    padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .aba.ativa { color: var(--texto); border-bottom-color: var(--accent); }
+
+  .painel-secao { display: none; }
+  .painel-secao.visivel { display: block; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    text-align: left; padding: 8px 10px; color: var(--muted); font-weight: 600;
+    border-bottom: 1px solid var(--linha); white-space: nowrap;
+  }
+  td {
+    padding: 9px 10px; border-bottom: 1px solid var(--linha); font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; white-space: nowrap;
+  }
+  tr:hover td { background: var(--painel); }
+
+  .etiqueta { padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+  .etiqueta.admin { background: rgba(227,162,59,0.18); color: var(--accent); }
+  .etiqueta.bloqueado { background: var(--danger-soft); color: #E8998C; }
+  .etiqueta.ok { background: rgba(76,133,99,0.18); color: var(--primary); }
+
+  .acao-btn {
+    background: var(--painel); border: 1px solid var(--linha); color: var(--texto);
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; margin-right: 4px;
+  }
+  .acao-btn:hover { border-color: var(--primary); }
+
+  .caixa-resultado {
+    margin-top: 10px; font-size: 12px; background: var(--painel); border: 1px solid var(--linha);
+    border-radius: 8px; padding: 10px; font-family: 'IBM Plex Mono', monospace; display: none;
+    word-break: break-all;
+  }
+  .caixa-resultado.visivel { display: block; }
+
+  .tabela-wrap { overflow-x: auto; border: 1px solid var(--linha); border-radius: 10px; }
+  .contador { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div id="tela-login-admin">
+    <div class="cartao-login">
+      <h1>Painel Administrativo</h1>
+      <p>Acesso restrito. Somente contas com permissão de administrador.</p>
+
+      <label for="admin-email">E-mail</label>
+      <input type="email" id="admin-email" placeholder="admin@nomelimpo.com.br">
+
+      <label for="admin-senha">Senha</label>
+      <input type="password" id="admin-senha">
+
+      <button class="botao-primario" id="botao-admin-login">Entrar</button>
+      <div class="erro" id="erro-admin-login"></div>
+    </div>
+  </div>
+
+  <div id="painel-admin">
+    <header>
+      <div class="marca">Nome Limpo <span>· Admin</span></div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <button id="botao-instalar-admin" class="acao-btn" style="display:none; border-color:var(--accent); color:var(--accent);">⇩ Instalar app</button>
+        <div class="sair" id="botao-sair">Sair</div>
+      </div>
+    </header>
+
+    <div class="abas">
+      <div class="aba ativa" data-secao="usuarios">Usuários</div>
+      <div class="aba" data-secao="auditoria">Auditoria</div>
+      <div class="aba" data-secao="negociacoes">Negociações</div>
+      <div class="aba" data-secao="consulta-manual">Consulta Manual</div>
+    </div>
+
+    <div class="painel-secao visivel" id="secao-usuarios">
+      <div class="contador" id="contador-usuarios">Carregando...</div>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>E-mail</th><th>Criado em</th><th>Status</th><th>Tentativas</th><th>Ações</th></tr></thead>
+          <tbody id="corpo-tabela-usuarios"></tbody>
+        </table>
+      </div>
+      <div class="caixa-resultado" id="resultado-acao-usuario"></div>
+    </div>
+
+    <div class="painel-secao" id="secao-auditoria">
+      <div class="contador" id="contador-auditoria">Carregando...</div>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>Timestamp</th><th>Usuário</th><th>Score antes</th><th>Score depois</th></tr></thead>
+          <tbody id="corpo-tabela-auditoria"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="painel-secao" id="secao-negociacoes">
+      <div class="contador" id="contador-negociacoes">Carregando...</div>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>Credor</th><th>Valor original</th><th>Com desconto</th><th>Status</th><th>Criado em</th></tr></thead>
+          <tbody id="corpo-tabela-negociacoes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="painel-secao" id="secao-consulta-manual">
+      <div class="contador">Atendimento estilo escritório — consulta o CPF/CNPJ direto no birô, sem depender de cadastro ou assinatura do cliente.</div>
+      <div style="background:var(--painel); border:1px solid var(--linha); border-radius:10px; padding:16px; margin-top:10px;">
+        <label for="cm-documento" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;">CPF ou CNPJ</label>
+        <input type="text" id="cm-documento" placeholder="000.000.000-00" style="width:100%; padding:10px 12px; border:1px solid var(--linha); border-radius:8px; font-size:14px; background:var(--bg); color:var(--texto); margin-bottom:12px;">
+
+        <label for="cm-observacao" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;">Observação (nome de quem ligou, forma de pagamento combinada, etc.)</label>
+        <input type="text" id="cm-observacao" placeholder="ex: Maria, atendida por telefone, pagou Pix pessoal R$25" style="width:100%; padding:10px 12px; border:1px solid var(--linha); border-radius:8px; font-size:14px; background:var(--bg); color:var(--texto); margin-bottom:14px;">
+
+        <button class="acao-btn" id="botao-consultar-manual" style="background:var(--primary); color:white; border-color:var(--primary); padding:10px 18px; font-size:13px;">Consultar no birô</button>
+      </div>
+
+      <div id="resultado-consulta-manual" style="display:none; margin-top:16px; background:var(--painel); border:1px solid var(--linha); border-radius:10px; padding:16px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE_URL = "http://localhost:8000";
+  let tokenAdmin = null;
+
+  // ---- Escape de HTML — obrigatório para todo dado que veio da API antes
+  // de inserir via innerHTML. Sem isso, um e-mail ou nome de credor
+  // malicioso digitado por qualquer usuário do sistema executaria
+  // JavaScript aqui no navegador do administrador (XSS armazenado).
+  function escaparHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = String(texto ?? "");
+    return div.innerHTML;
+  }
+
+  // ---- Service worker + instalação (PWA) ----
+  // O navegador dispara este evento pra QUALQUER visitante da página — isso
+  // é uma limitação técnica do próprio padrão PWA, não tem como restringir
+  // isso por credencial. Por isso o botão de instalar só é REVELADO depois
+  // que o login de admin é confirmado com sucesso (ver botão-admin-login).
+  // Sem confirmar admin no backend, nada dentro do app instalado funciona.
+  let eventoInstalacaoDiferido = null;
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("admin-service-worker.js").catch(() => {});
+    });
+  }
+
+  window.addEventListener("beforeinstallprompt", (evento) => {
+    evento.preventDefault();
+    eventoInstalacaoDiferido = evento;
+  });
+
+  document.getElementById("botao-instalar-admin").addEventListener("click", async () => {
+    if (!eventoInstalacaoDiferido) return;
+    eventoInstalacaoDiferido.prompt();
+    await eventoInstalacaoDiferido.userChoice;
+    eventoInstalacaoDiferido = null;
+  });
+
+  function revelarBotaoInstalarSeDisponivel() {
+    if (eventoInstalacaoDiferido) {
+      document.getElementById("botao-instalar-admin").style.display = "inline-block";
+    }
+  }
+
+  document.getElementById("botao-admin-login").addEventListener("click", async () => {
+    const email = document.getElementById("admin-email").value.trim();
+    const senha = document.getElementById("admin-senha").value;
+    const caixaErro = document.getElementById("erro-admin-login");
+    caixaErro.classList.remove("visivel");
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/login?email=${encodeURIComponent(email)}&senha=${encodeURIComponent(senha)}`, { method: "POST" });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail || "credenciais inválidas");
+
+      tokenAdmin = dados.access_token;
+
+      // Testa se essa conta realmente tem permissão de admin antes de mostrar o painel
+      const teste = await fetch(`${API_BASE_URL}/admin/usuarios?limit=1`, { headers: { Authorization: `Bearer ${tokenAdmin}` } });
+      if (teste.status === 403) throw new Error("Esta conta não tem permissão de administrador.");
+      if (!teste.ok) throw new Error("Erro ao validar acesso administrativo.");
+
+      document.getElementById("tela-login-admin").style.display = "none";
+      document.getElementById("painel-admin").classList.add("visivel");
+      revelarBotaoInstalarSeDisponivel();
+      carregarUsuarios();
+      carregarAuditoria();
+      carregarNegociacoes();
+    } catch (erro) {
+      caixaErro.textContent = erro.message;
+      caixaErro.classList.add("visivel");
+    }
+  });
+
+  document.getElementById("botao-sair").addEventListener("click", () => {
+    tokenAdmin = null;
+    document.getElementById("painel-admin").classList.remove("visivel");
+    document.getElementById("tela-login-admin").style.display = "block";
+  });
+
+  document.querySelectorAll(".aba").forEach((aba) => {
+    aba.addEventListener("click", () => {
+      document.querySelectorAll(".aba").forEach((a) => a.classList.remove("ativa"));
+      document.querySelectorAll(".painel-secao").forEach((s) => s.classList.remove("visivel"));
+      aba.classList.add("ativa");
+      document.getElementById(`secao-${aba.dataset.secao}`).classList.add("visivel");
+    });
+  });
+
+  async function chamarApiAdmin(caminho) {
+    const resp = await fetch(`${API_BASE_URL}${caminho}`, { headers: { Authorization: `Bearer ${tokenAdmin}` } });
+    if (!resp.ok) throw new Error(`Erro ${resp.status}`);
+    return resp.json();
+  }
+
+  async function carregarUsuarios() {
+    try {
+      const dados = await chamarApiAdmin("/admin/usuarios?limit=100");
+      document.getElementById("contador-usuarios").textContent = `${dados.usuarios.length} usuário(s)`;
+      const corpo = document.getElementById("corpo-tabela-usuarios");
+      corpo.innerHTML = "";
+      dados.usuarios.forEach((u) => {
+        const tr = document.createElement("tr");
+        const statusEtiqueta = u.bloqueado_ate
+          ? '<span class="etiqueta bloqueado">bloqueado</span>'
+          : '<span class="etiqueta ok">ok</span>';
+        const adminEtiqueta = u.is_admin ? ' <span class="etiqueta admin">admin</span>' : "";
+        tr.innerHTML = `
+          <td>${escaparHtml(u.email)}</td>
+          <td>${new Date(u.criado_em).toLocaleString("pt-BR")}</td>
+          <td>${statusEtiqueta}${adminEtiqueta}</td>
+          <td>${u.tentativas_login_falhas}</td>
+          <td>
+            <button class="acao-btn" onclick="forcarResetSenha('${u.id}')">Resetar senha</button>
+            <button class="acao-btn" onclick="desbloquearUsuario('${u.id}')">Desbloquear</button>
+          </td>
+        `;
+        corpo.appendChild(tr);
+      });
+    } catch (erro) {
+      document.getElementById("contador-usuarios").textContent = "Erro ao carregar usuários.";
+    }
+  }
+
+  async function carregarAuditoria() {
+    try {
+      const dados = await chamarApiAdmin("/admin/auditoria?limit=100");
+      document.getElementById("contador-auditoria").textContent = `${dados.eventos.length} evento(s)`;
+      const corpo = document.getElementById("corpo-tabela-auditoria");
+      corpo.innerHTML = "";
+      dados.eventos.forEach((e) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${new Date(e.timestamp).toLocaleString("pt-BR")}</td>
+          <td>${e.usuario_id.slice(0, 8)}...</td>
+          <td>${e.score_anterior}</td>
+          <td>${e.score_novo}</td>
+        `;
+        corpo.appendChild(tr);
+      });
+    } catch (erro) {
+      document.getElementById("contador-auditoria").textContent = "Erro ao carregar auditoria.";
+    }
+  }
+
+  async function carregarNegociacoes() {
+    try {
+      const dados = await chamarApiAdmin("/admin/negociacoes?limit=100");
+      document.getElementById("contador-negociacoes").textContent = `${dados.negociacoes.length} negociação(ões)`;
+      const corpo = document.getElementById("corpo-tabela-negociacoes");
+      corpo.innerHTML = "";
+      dados.negociacoes.forEach((n) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escaparHtml(n.credor)}</td>
+          <td>R$ ${n.valor_original.toFixed(2)}</td>
+          <td>${n.valor_com_desconto ? "R$ " + n.valor_com_desconto.toFixed(2) : "—"}</td>
+          <td>${n.status}</td>
+          <td>${new Date(n.criado_em).toLocaleString("pt-BR")}</td>
+        `;
+        corpo.appendChild(tr);
+      });
+    } catch (erro) {
+      document.getElementById("contador-negociacoes").textContent = "Erro ao carregar negociações.";
+    }
+  }
+
+  async function forcarResetSenha(usuarioId) {
+    const caixa = document.getElementById("resultado-acao-usuario");
+    try {
+      const resp = await fetch(`${API_BASE_URL}/admin/usuarios/${usuarioId}/forcar-reset-senha`, {
+        method: "POST", headers: { Authorization: `Bearer ${tokenAdmin}` },
+      });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail);
+      caixa.textContent = `Token gerado (repasse ao usuário por outro canal, ex: WhatsApp): ${dados.token} — expira em ${new Date(dados.expira_em).toLocaleString("pt-BR")}`;
+      caixa.classList.add("visivel");
+    } catch (erro) {
+      caixa.textContent = `Erro: ${erro.message}`;
+      caixa.classList.add("visivel");
+    }
+  }
+
+  async function desbloquearUsuario(usuarioId) {
+    const caixa = document.getElementById("resultado-acao-usuario");
+    try {
+      const resp = await fetch(`${API_BASE_URL}/admin/usuarios/${usuarioId}/desbloquear`, {
+        method: "POST", headers: { Authorization: `Bearer ${tokenAdmin}` },
+      });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail);
+      caixa.textContent = "Conta desbloqueada com sucesso.";
+      caixa.classList.add("visivel");
+      carregarUsuarios();
+    } catch (erro) {
+      caixa.textContent = `Erro: ${erro.message}`;
+      caixa.classList.add("visivel");
+    }
+  }
+
+  // ---- Consulta manual (estilo escritório) ----
+  function escaparHtmlCM(texto) {
+    const div = document.createElement("div");
+    div.textContent = String(texto ?? "");
+    return div.innerHTML;
+  }
+
+  document.getElementById("botao-consultar-manual").addEventListener("click", async () => {
+    const documento = document.getElementById("cm-documento").value.trim();
+    const observacao = document.getElementById("cm-observacao").value.trim();
+    const caixaResultado = document.getElementById("resultado-consulta-manual");
+    const botao = document.getElementById("botao-consultar-manual");
+
+    if (!documento) {
+      caixaResultado.style.display = "block";
+      caixaResultado.innerHTML = `<span style="color:var(--danger)">Informe o CPF ou CNPJ.</span>`;
+      return;
+    }
+
+    botao.disabled = true;
+    botao.textContent = "Consultando...";
+    caixaResultado.style.display = "block";
+    caixaResultado.innerHTML = `<span style="color:var(--muted)">Consultando o birô — isso pode levar alguns segundos...</span>`;
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/admin/consulta-manual-serasa`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenAdmin}` },
+        body: JSON.stringify({ documento, observacao }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.detail || `Erro ${resp.status}`);
+
+      const dividasHtml = dados.dividas_negativadas.length
+        ? dados.dividas_negativadas.map((d) => `
+            <div style="padding:8px 0; border-top:1px solid var(--linha); font-size:12.5px;">
+              <strong>${escaparHtmlCM(d.credor)}</strong> — R$ ${d.valor.toFixed(2)}
+              <br><span style="color:var(--muted)">${d.dias_atraso} dias em atraso · ${escaparHtmlCM(d.origem)}</span>
+            </div>
+          `).join("")
+        : `<div style="color:var(--muted); font-size:12.5px; padding-top:8px;">Nenhuma dívida negativada encontrada.</div>`;
+
+      caixaResultado.innerHTML = `
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">
+          Fonte: ${escaparHtmlCM(dados.fonte)} · próxima consulta real liberada em ${dados.dias_restantes_ate_nova_consulta_real} dia(s)
+        </div>
+        <div style="font-family:'IBM Plex Mono', monospace; font-size:28px; color:var(--accent); margin-bottom:4px;">
+          ${dados.score ?? "—"}
+        </div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+          Score · ${dados.consultas_cpf_ultimos_30_dias} consulta(s) ao CPF nos últimos 30 dias
+        </div>
+        <div style="font-weight:600; font-size:13px; margin-top:6px;">Dívidas negativadas</div>
+        ${dividasHtml}
+      `;
+    } catch (erro) {
+      caixaResultado.innerHTML = `<span style="color:var(--danger)">Erro: ${escaparHtmlCM(erro.message)}</span>`;
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Consultar no birô";
+    }
+  });
+</script>
+
+</body>
+</html>

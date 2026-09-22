@@ -1,0 +1,72 @@
+====================================================================
+ TELA 1 — DASHBOARD DE SCORE
+====================================================================
+
+┌──────────────────────────────────────────────────────────────┐
+│  Olá, Maria                                    [🔔 2]  [☰]     │
+├──────────────────────────────────────────────────────────────┤
+│                                                                  │
+│                     SEU SCORE ATUAL                             │
+│                                                                  │
+│                         ╭─────╮                                 │
+│                        ╱  560  ╲          Faixa: REGULAR        │
+│                       │  /1000  │         ↑ +14 pts (30 dias)   │
+│                        ╲───────╱                                 │
+│                                                                  │
+│   Fonte: Serasa • Última atualização: 14/09/2026                │
+│                                                                  │
+├──────────────────────────────────────────────────────────────┤
+│  O QUE MAIS PESA NO SEU SCORE                                   │
+│                                                                  │
+│  Histórico de pagamento        ▓▓▓▓▓▓▓░░░  35%   ✓ 92% em dia   │
+│  Utilização de crédito         ▓▓▓▓▓▓░░░░  30%   ⚠ 88% usado    │
+│  Tempo de relacionamento       ▓▓▓░░░░░░░  15%   ✓ 42 meses     │
+│  Diversidade de crédito        ▓▓░░░░░░░░  10%   • 3 tipos      │
+│  Consultas recentes ao CPF     ▓▓░░░░░░░░  10%   ⚠ 2 em 30 dias │
+│                                                                  │
+├──────────────────────────────────────────────────────────────┤
+│  ⚠ ALERTA: nova consulta ao seu CPF detectada em 12/09/2026     │
+│     Isso pode atrasar seu plano em até 30 dias. [Ver detalhes]  │
+├──────────────────────────────────────────────────────────────┤
+│         [ Ver Plano de Ação Completo → ]                        │
+└──────────────────────────────────────────────────────────────┘
+
+
+====================================================================
+ TELA 2 — PAINEL DE PLANO DE AÇÃO (MISSÕES)
+====================================================================
+
+┌──────────────────────────────────────────────────────────────┐
+│  ← Voltar          PLANO DE AÇÃO                    [560→606]  │
+├──────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ① Quitar dívida — Credor Alfa Financeira                       │
+│     R$ 340,00 • 120 dias em atraso                              │
+│     Impacto estimado: +11.4 a +18.6 pontos                      │
+│     Prazo estimado: ~85 dias                                    │
+│     [ Pagar agora ]   [ Negociar ]   status: PENDENTE           │
+│  ──────────────────────────────────────────────────────────    │
+│                                                                  │
+│  ② Reduzir uso do limite do cartão                               │
+│     De 88% para 30% do limite disponível                        │
+│     Impacto estimado: +10.0 a +16.7 pontos                      │
+│     Prazo estimado: ~65 dias                                    │
+│     [ Marcar como concluída ]              status: PENDENTE     │
+│  ──────────────────────────────────────────────────────────    │
+│                                                                  │
+│  ③ Quitar dívida — Loja Beta Varejo                              │
+│     R$ 89,90 • 30 dias em atraso                                │
+│     Impacto estimado: +7.7 a +12.5 pontos                       │
+│     Prazo estimado: ~85 dias                                    │
+│     [ Pagar agora ]                        status: PENDENTE     │
+│  ──────────────────────────────────────────────────────────    │
+│                                                                  │
+│  ④ Evitar novas consultas de CPF                                 │
+│     Próximos 90 dias                                             │
+│     Impacto: preserva a pontuação atual                          │
+│     status: EM ANDAMENTO                                         │
+│                                                                  │
+├──────────────────────────────────────────────────────────────┤
+│  ⚠ Estimativas de um modelo estatístico interno. O score        │
+│     oficial é calculado apenas pelo biro de crédito.            │
+└──────────────────────────────────────────────────────────────┘

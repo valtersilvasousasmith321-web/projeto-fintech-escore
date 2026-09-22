@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Score</title>
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --deep: #16241F;
+    --primary: #1F4B3F;
+    --primary-light: #2E6650;
+    --accent: #E3A23B;
+    --accent-soft: #FBEBD2;
+    --danger: #B3452F;
+    --danger-soft: #F5E1DA;
+    --success: #4C8563;
+    --line: #E3DFD4;
+    --muted: #6B6A62;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--deep);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+  }
+
+  .tela {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 28px 20px 100px;
+  }
+
+  /* ---------- Cabeçalho ---------- */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .marca {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .marca-nome {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: -0.01em;
+  }
+
+  .lema {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 220px;
+    line-height: 1.4;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Módulo principal: score ---------- */
+  .modulo-score {
+    background: var(--primary);
+    border-radius: 20px;
+    padding: 26px 24px 24px;
+    color: white;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modulo-score::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    opacity: 0.5;
+  }
+
+  .score-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-rotulo {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .score-faixa {
+    font-size: 12px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+
+  .score-corpo {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    margin-top: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-numero {
+    font-family: 'Fraunces', serif;
+    font-size: 68px;
+    font-weight: 600;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+  }
+
+  .score-escala {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+  }
+
+  .score-barra-fundo {
+    margin-top: 18px;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-barra-preenchida {
+    height: 100%;
+    width: 56%;
+    background: var(--accent);
+    border-radius: 100px;
+  }
+
+  .score-rodape {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-delta {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---------- Alerta ---------- */
+  .alerta {
+    display: flex;
+    gap: 12px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 13px 14px;
+    margin-bottom: 28px;
+  }
+
+  .alerta-icone {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  .alerta-texto {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #6B4A1E;
+  }
+
+  .alerta-texto strong { color: var(--deep); }
+
+  /* ---------- Seções ---------- */
+  section { margin-bottom: 30px; }
+
+  .secao-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--deep);
+  }
+
+  .secao-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  /* ---------- Fatores ---------- */
+  .fator {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .fator:last-child { border-bottom: none; }
+
+  .fator-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .fator-nome {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .fator-peso {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .fator-barra-fundo {
+    height: 5px;
+    background: var(--line);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 7px;
+  }
+
+  .fator-barra-preenchida {
+    height: 100%;
+    border-radius: 100px;
+  }
+
+  .cor-ok { background: var(--success); }
+  .cor-atencao { background: var(--danger); }
+  .cor-neutro { background: var(--primary); }
+
+  .fator-status {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .fator-status .sinal-ok { color: var(--success); font-weight: 600; }
+  .fator-status .sinal-atencao { color: var(--danger); font-weight: 600; }
+
+  /* ---------- Pendências ---------- */
+  .pendencia {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pendencia:last-child { border-bottom: none; }
+
+  .pendencia-barra {
+    width: 3px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+
+  .pendencia-barra.urgente { background: var(--accent); }
+  .pendencia-barra.negativado { background: var(--danger); }
+
+  .pendencia-corpo { flex: 1; }
+
+  .pendencia-topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .pendencia-credor {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .pendencia-valor {
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pendencia-info {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .pendencia-acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+    color: var(--deep);
+    background: white;
+  }
+
+  .chip.chip-principal {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* ---------- CTA fixo ---------- */
+  .cta-fixo {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 16px 20px 22px;
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+  }
+
+  .botao-principal {
+    width: 100%;
+    max-width: 380px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .aviso-legal {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    padding-top: 4px;
+    border-top: 1px solid var(--line);
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tela">
+
+  <header>
+    <div class="marca">
+      <div class="marca-nome">Nome Limpo</div>
+      <div class="lema">A gente resolve seu nome sujo e aumenta seu score — passo a passo, até o fim.</div>
+    </div>
+    <div class="avatar">M</div>
+  </header>
+
+  <div class="modulo-score">
+    <div class="score-topo">
+      <span class="score-rotulo">Seu score hoje</span>
+      <span class="score-faixa">Regular</span>
+    </div>
+    <div class="score-corpo">
+      <span class="score-numero">530</span>
+      <span class="score-escala">/ 1000</span>
+    </div>
+    <div class="score-barra-fundo">
+      <div class="score-barra-preenchida"></div>
+    </div>
+    <div class="score-rodape">
+      <span>Fonte: Serasa · atualizado hoje</span>
+      <span class="score-delta">se seguir o plano: 606 em 90 dias</span>
+    </div>
+  </div>
+
+  <div class="alerta">
+    <span class="alerta-icone">⚠</span>
+    <span class="alerta-texto"><strong>Nova consulta ao seu CPF</strong> detectada em 12/09. Isso pode atrasar seu plano em até 30 dias.</span>
+  </div>
+
+  <section>
+    <div class="secao-titulo">Por que seu score está em 530</div>
+    <div class="secao-sub">Os 5 fatores que compõem o cálculo, do que mais pesa pro que menos pesa.</div>
+
+    <div class="fator">
+      <div class="fator-topo">
+        <span class="fator-nome">Histórico de pagamento</span>
+        <span class="fator-peso">peso 35%</span>
+      </div>
+      <div class="fator-barra-fundo"><div class="fator-barra-preenchida cor-atencao" style="width: 78%"></div></div>
+      <div class="fator-status">78% dos pagamentos em dia. <span class="sinal-atencao">2 dívidas em atraso</span> ainda pesando contra você.</div>
+    </div>
+
+    <div class="fator">
+      <div class="fator-topo">
+        <span class="fator-nome">Utilização de crédito</span>
+        <span class="fator-peso">peso 30%</span>
+      </div>
+      <div class="fator-barra-fundo"><div class="fator-barra-preenchida cor-atencao" style="width: 88%"></div></div>
+      <div class="fator-status">Você usa <span class="sinal-atencao">88% do limite</span> disponível. O ideal é até 30%.</div>
+    </div>
+
+    <div class="fator">
+      <div class="fator-topo">
+        <span class="fator-nome">Tempo de relacionamento</span>
+        <span class="fator-peso">peso 15%</span>
+      </div>
+      <div class="fator-barra-fundo"><div class="fator-barra-preenchida cor-ok" style="width: 90%"></div></div>
+      <div class="fator-status"><span class="sinal-ok">42 meses de histórico.</span> Este fator já está a seu favor.</div>
+    </div>
+
+    <div class="fator">
+      <div class="fator-topo">
+        <span class="fator-nome">Diversidade de crédito</span>
+        <span class="fator-peso">peso 10%</span>
+      </div>
+      <div class="fator-barra-fundo"><div class="fator-barra-preenchida cor-ok" style="width: 70%"></div></div>
+      <div class="fator-status"><span class="sinal-ok">3 tipos de crédito ativos,</span> numa faixa equilibrada.</div>
+    </div>
+
+    <div class="fator">
+      <div class="fator-topo">
+        <span class="fator-nome">Consultas recentes ao CPF</span>
+        <span class="fator-peso">peso 10%</span>
+      </div>
+      <div class="fator-barra-fundo"><div class="fator-barra-preenchida cor-atencao" style="width: 40%"></div></div>
+      <div class="fator-status"><span class="sinal-atencao">2 consultas</span> nos últimos 30 dias.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secao-titulo">Suas pendências ativas</div>
+    <div class="secao-sub">3 pendências — resolva primeiro as que ainda não foram negativadas.</div>
+
+    <div class="pendencia">
+      <div class="pendencia-barra urgente"></div>
+      <div class="pendencia-corpo">
+        <div class="pendencia-topo">
+          <span class="pendencia-credor">Banco XPTO — Fatura Cartão</span>
+          <span class="pendencia-valor">R$ 612,40</span>
+        </div>
+        <div class="pendencia-info">Vencida há 5 dias · ainda não negativada</div>
+        <div class="pendencia-acoes">
+          <span class="chip chip-principal">Pagar agora</span>
+          <span class="chip">Negociar com o banco</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pendencia">
+      <div class="pendencia-barra negativado"></div>
+      <div class="pendencia-corpo">
+        <div class="pendencia-topo">
+          <span class="pendencia-credor">Credor Alfa Financeira</span>
+          <span class="pendencia-valor">R$ 340,00</span>
+        </div>
+        <div class="pendencia-info">Vencida há 120 dias · negativada no Serasa</div>
+        <div class="pendencia-acoes">
+          <span class="chip chip-principal">Negociar direto</span>
+          <span class="chip">Ver oferta Limpa Nome</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pendencia">
+      <div class="pendencia-barra negativado"></div>
+      <div class="pendencia-corpo">
+        <div class="pendencia-topo">
+          <span class="pendencia-credor">Loja Beta Varejo</span>
+          <span class="pendencia-valor">R$ 89,90</span>
+        </div>
+        <div class="pendencia-info">Vencida há 30 dias · negativada na Boa Vista</div>
+        <div class="pendencia-acoes">
+          <span class="chip chip-principal">Negociar direto</span>
+          <span class="chip">Ver oferta Limpa Nome</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="aviso-legal">
+    Estimativas baseadas em modelo estatístico interno. O score oficial é calculado exclusivamente pelo birô de crédito.
+  </div>
+
+</div>
+
+<div class="cta-fixo">
+  <button class="botao-principal">Ver plano de ação completo</button>
+</div>
+
+</body>
+</html>

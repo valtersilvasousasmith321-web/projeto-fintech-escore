@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano de Ação</title>
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --deep: #16241F;
+    --primary: #1F4B3F;
+    --primary-light: #2E6650;
+    --accent: #E3A23B;
+    --accent-soft: #FBEBD2;
+    --danger: #B3452F;
+    --danger-soft: #F5E1DA;
+    --success: #4C8563;
+    --success-soft: #E4EEE7;
+    --line: #E3DFD4;
+    --muted: #6B6A62;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--deep);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+  }
+
+  .tela {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 22px 20px 40px;
+  }
+
+  /* ---------- Cabeçalho ---------- */
+  .topo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .voltar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  .topo-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+  }
+
+  /* ---------- Resumo de progresso ---------- */
+  .resumo {
+    background: var(--primary);
+    border-radius: 20px;
+    padding: 22px;
+    color: white;
+    margin-bottom: 26px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .resumo::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    bottom: -60px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    opacity: 0.45;
+  }
+
+  .resumo-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .resumo-bloco { display: flex; flex-direction: column; gap: 4px; }
+
+  .resumo-rotulo {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .resumo-valor {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 600;
+  }
+
+  .resumo-seta {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: rgba(255,255,255,0.5);
+    padding: 0 4px;
+  }
+
+  .resumo-destaque .resumo-valor { color: var(--accent); }
+
+  .resumo-progresso {
+    margin-top: 18px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .resumo-progresso-topo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 6px;
+  }
+
+  .resumo-barra-fundo {
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .resumo-barra-preenchida {
+    height: 100%;
+    width: 25%;
+    background: var(--accent);
+    border-radius: 100px;
+  }
+
+  /* ---------- Lista de ações ---------- */
+  .secao-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .secao-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .lista-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+
+  .acao {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+  }
+
+  .acao.concluida {
+    background: var(--success-soft);
+    border-color: transparent;
+  }
+
+  .acao.andamento {
+    border-color: var(--accent);
+  }
+
+  .acao-topo {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .acao-marca {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .acao-marca.feita {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .acao-marca.ativa {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .acao-corpo { flex: 1; }
+
+  .acao-titulo {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 3px;
+  }
+
+  .acao.concluida .acao-titulo {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--success);
+  }
+
+  .acao-meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .acao-detalhes {
+    display: flex;
+    gap: 18px;
+    padding-top: 12px;
+    margin-top: 2px;
+    border-top: 1px solid var(--line);
+  }
+
+  .acao.concluida .acao-detalhes { border-top-color: rgba(76,133,99,0.25); }
+
+  .detalhe-item { display: flex; flex-direction: column; gap: 2px; }
+
+  .detalhe-rotulo {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .detalhe-valor {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detalhe-valor.cor-impacto { color: var(--success); }
+  .detalhe-valor.cor-prazo { color: var(--deep); }
+
+  .acao-rodape {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .botao-acao {
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .botao-acao.principal {
+    background: var(--primary);
+    color: white;
+  }
+
+  .botao-acao.secundario {
+    background: white;
+    border: 1px solid var(--line);
+    color: var(--deep);
+  }
+
+  .etiqueta-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 100px;
+    align-self: flex-start;
+  }
+
+  .etiqueta-status.feita { background: var(--success-soft); color: var(--success); }
+  .etiqueta-status.ativa { background: var(--accent-soft); color: #8A5A16; }
+
+  /* ---------- Comportamental ---------- */
+  .acao-comportamental {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent-soft);
+    border-radius: 14px;
+    padding: 15px 16px;
+  }
+
+  .acao-comportamental-icone { font-size: 18px; }
+
+  .acao-comportamental-texto {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #6B4A1E;
+  }
+
+  .acao-comportamental-texto strong { color: var(--deep); }
+
+  /* ---------- Rodapé legal ---------- */
+  .aviso-legal {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<div class="tela">
+
+  <div class="topo">
+    <div class="voltar">‹</div>
+    <div class="topo-titulo">Plano de ação</div>
+  </div>
+
+  <div class="resumo">
+    <div class="resumo-linha">
+      <div class="resumo-bloco">
+        <span class="resumo-rotulo">Score hoje</span>
+        <span class="resumo-valor">530</span>
+      </div>
+      <span class="resumo-seta">→</span>
+      <div class="resumo-bloco resumo-destaque">
+        <span class="resumo-rotulo">Estimado em 90 dias</span>
+        <span class="resumo-valor">606</span>
+      </div>
+    </div>
+    <div class="resumo-progresso">
+      <div class="resumo-progresso-topo">
+        <span>1 de 4 ações concluídas</span>
+        <span>25%</span>
+      </div>
+      <div class="resumo-barra-fundo">
+        <div class="resumo-barra-preenchida"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="secao-titulo">Suas ações, por impacto</div>
+  <div class="secao-sub">Ordenadas do que mais aumenta seu score pro que menos aumenta.</div>
+
+  <div class="lista-acoes">
+
+    <div class="acao andamento">
+      <div class="acao-topo">
+        <div class="acao-marca ativa">1</div>
+        <div class="acao-corpo">
+          <div class="acao-titulo">Quitar dívida — Credor Alfa Financeira</div>
+          <div class="acao-meta">R$ 340,00 · 120 dias em atraso</div>
+        </div>
+      </div>
+      <div class="acao-detalhes">
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Impacto estimado</span>
+          <span class="detalhe-valor cor-impacto">+11,4 a +18,6 pts</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Prazo estimado</span>
+          <span class="detalhe-valor cor-prazo">~85 dias</span>
+        </div>
+      </div>
+      <div class="acao-rodape">
+        <button class="botao-acao principal">Negociar direto</button>
+        <button class="botao-acao secundario">Ver oferta Limpa Nome</button>
+      </div>
+    </div>
+
+    <div class="acao andamento">
+      <div class="acao-topo">
+        <div class="acao-marca ativa">2</div>
+        <div class="acao-corpo">
+          <div class="acao-titulo">Reduzir uso do limite do cartão</div>
+          <div class="acao-meta">De 88% para 30% do limite disponível</div>
+        </div>
+      </div>
+      <div class="acao-detalhes">
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Impacto estimado</span>
+          <span class="detalhe-valor cor-impacto">+10,0 a +16,7 pts</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Prazo estimado</span>
+          <span class="detalhe-valor cor-prazo">~65 dias</span>
+        </div>
+      </div>
+      <div class="acao-rodape">
+        <button class="botao-acao principal">Marcar como feito</button>
+      </div>
+    </div>
+
+    <div class="acao andamento">
+      <div class="acao-topo">
+        <div class="acao-marca ativa">3</div>
+        <div class="acao-corpo">
+          <div class="acao-titulo">Quitar dívida — Loja Beta Varejo</div>
+          <div class="acao-meta">R$ 89,90 · 30 dias em atraso</div>
+        </div>
+      </div>
+      <div class="acao-detalhes">
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Impacto estimado</span>
+          <span class="detalhe-valor cor-impacto">+7,7 a +12,5 pts</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">Prazo estimado</span>
+          <span class="detalhe-valor cor-prazo">~85 dias</span>
+        </div>
+      </div>
+      <div class="acao-rodape">
+        <button class="botao-acao principal">Negociar direto</button>
+        <button class="botao-acao secundario">Ver oferta Limpa Nome</button>
+      </div>
+    </div>
+
+    <div class="acao concluida">
+      <div class="acao-topo">
+        <div class="acao-marca feita">✓</div>
+        <div class="acao-corpo">
+          <div class="acao-titulo">Evitar novas consultas de CPF</div>
+          <div class="acao-meta">Iniciado há 12 dias · faltam 78</div>
+        </div>
+      </div>
+      <div class="acao-detalhes">
+        <div class="detalhe-item">
+          <span class="detalhe-rotulo">O que isso protege</span>
+          <span class="detalhe-valor" style="color:var(--success)">preserva a pontuação atual</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="acao-comportamental">
+    <span class="acao-comportamental-icone">◐</span>
+    <span class="acao-comportamental-texto"><strong>Dica:</strong> resolva primeiro as ações marcadas em amarelo — são as de maior impacto no seu score.</span>
+  </div>
+
+  <div class="aviso-legal">
+    Estimativas baseadas em modelo estatístico interno. O score oficial é calculado exclusivamente pelo birô de crédito.
+  </div>
+
+</div>
+
+</body>
+</html>
